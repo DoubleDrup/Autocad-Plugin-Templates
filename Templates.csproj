@@ -1,0 +1,22 @@
+<Project Sdk="Microsoft.Net.Sdk">
+    
+    <PropertyGroup>
+        <PackageType>Template</PackageType>
+        <PackageVersion>1.0</PackageVersion>
+        <PackageId>Autocad.Template.Package</PackageId>
+        <Title>Autocad plugin template package for C#</Title>
+        <Authors>Luc van Dijk</Authors>
+        <Description>A couple of templates for quickly creating a new Autocad plugin using C#</Description>
+        <PackageTags>templates;dotnet;AutoCad</PackageTags>
+        <TargetFramework>net8.0</TargetFramework>
+        
+        <IncludeContentInPack>true</IncludeContentInPack>
+        <IncludeBuildOutput>false</IncludeBuildOutput>
+        <ContentTargetFolders>content</ContentTargetFolders>
+    </PropertyGroup>
+    
+    <ItemGroup>
+        <Content Include="templates\**\*" Exclude="templates\**\bin\**;templates\**\obj**" />
+        <Compile Remove="**\*" />
+    </ItemGroup>
+</Project>
