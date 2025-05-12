@@ -6,70 +6,289 @@ I noticed while creating AutoCAD plugins that the starting point of each project
 This tutorial will focus on making an AutoCAD plugin template package, but whether you are here for the AutoCAD part or just want to understand the templates for .NET, following this tutorial will enable you to create complex templates using basic building blocks. 
 
 ### The backbone of a template
-There is one key element that all of templates need: The `template.json` file. It contains all the configuration data for the implementation of your template. Once this file is added to a `.template.config` folder, .NET will be able to understand that the files and folders that are in the same folder as the .template.config folder belong to a template. Let's create an example template without using any code editor.
+There is one key element that all templates need: The `template.json` file. It contains all the configuration data for the implementation of your template. Once this file is added to a `.template.config` folder, .NET will be able to understand that the files and folders that are in the same folder as the .template.config folder belong to a template. Let's create an example template without using any code editor.
 
 [comment]: <> (tree signs: │ ├─── └───)
 ```
-EmptyTemplate
+AutocadTemplate
 └───.template.config 
     │   template.json
 ```
 
-1. Create a folder called `EmptyTemplate`.
+1. Create a folder called `AutocadTemplate`.
 2. Add a `.template.config` folder to it.
-3. Add a `.text` file to it, open it and add the following json styled text:
+3. Add a `.text` file to it, open it and add the json styled text below. You can find [here](https://learn.microsoft.com/en-us/dotnet/core/tools/custom-templates) what all the items mean. Most of them do not need clarification, but we will explore the important once later on in this tutorial.
+    ```json
+    {
+      "$schema": "http://json.schemastore.org/template",
+      "author": "Luc van Dijk",
+      "classifications": [ "Autocad", "Plugin" ],
+      "identity": "AutocadTemplate",
+      "name": "Autocad Template",
+      "shortName": "ac-temp",
+      "sourceName": "AutocadTemplate",
+      "preferNameDirectory":true,
+      "tags": {
+        "language": "C#",
+        "type": "project"
+      }
+    }
+    ```
+4. Save the file as 'template.json' and remove the earlier created `.txt` file.
+
+We now have the previously shown structure and that means that we have created our first template. We can quickly test it by opening a terminal, go in the directory of `...\AutocadTemplate`. Now run the command `dotnet new install .` and your template is ready for use. If you do a `dotnet new list` you will see your template there. You can also open a code editor, create a new project and then find your newest template there.
+
+If you create an implementation of the template, the `.template.config` folder has disappeared. This is the default behaviour of a template.
+
+We will be updating the template quite a bit in this tutorial and every time you want to see the changes, reinstall:
+
+- `dotnet new uninstall <path\to\your\template>`
+
+- `dotnet new install .` (in your template folder)
+
+### Adding file/folder to your project template
+The next step is adding some structure and some files to a project. In my case I would like to have a `.csproj` that has the setup for my project already partially defined.
+
+Let's do it:
+1. Before we start, we need to install the [AutoCAD ObjectARX](https://aps.autodesk.com/developer/overview/objectarx-autocad-sdk). The download link is hidden behind the button "View license agreement". Download it and place it in a convenient place on your computer. For this tutorial we are only interested in a couple of `.dll` files in the `inc` folder. You can skip this step or download another package if you are not here for the AutoCAD part.
+2. Create a new `.txt` file in the `AutocadTemplate` folder.
+3. Open the file and add the following code.
+    ```xml
+    <Project Sdk="Microsoft.NET.Sdk">
+    
+        <PropertyGroup>
+            <TargetFramework>net8.0</TargetFramework>
+            <ImplicitUsings>enable</ImplicitUsings>
+            <Nullable>enable</Nullable>
+            <RootNamespace>AutocadTemplate</RootNamespace>
+        </PropertyGroup>
+        
+        <ItemGroup>
+            <Reference Include="accoremgd">
+                <HintPath>C:\Autocad 2026 ObjectARX\inc\AcCoreMgd.dll</HintPath>
+                <Private>False</Private>
+            </Reference>
+            <Reference Include="Acdbmgd">
+                <HintPath>C:\Autocad 2026 ObjectARX\inc\AcDbMgd.dll</HintPath>
+                <Private>False</Private>
+            </Reference>
+            <Reference Include="acmgd">
+                <HintPath>C:\Autocad 2026 ObjectARX\inc\AcMgd.dll</HintPath>
+                <Private>False</Private>
+            </Reference>
+        </ItemGroup>
+    
+    </Project>
+    ```
+4. Change the `RootNamespace` to the value of `sourceName` in the `template.json` file. This is important because every instance of this value will be replaced to the _name of the implementation of the template_, which is really handy. We will look at this after we reinstall the template. 
+5. Change the paths of the references to `accoremgd.dll`, `Acdbmgd.dll` and `acmgd.dll` to the location of the .
+6. Save the file as `AutocadTemplate.csproj` and remove the `.txt` file.
+
+Reinstall your template like earlier and then create a project that is called `TestSourceName` for example. When you inspect the project you will see the following changes:
+- `AutocadTemplate.csproj` -> `TestSourceName.csproj`
+- `<RootNamespace>AutocadTemplate</RootNamespace>` -> `<RootNamespace>TestSourceName</RootNamespace>`
+
+Pretty useful, right? 
+
+Let's start working in a code editor now. Pick one you like, and open the `AutocadTemplate.csproj` in this editor.
+
+Since the `.template.config` was not indexed with the project, it might not be visible in your code editor. We want to keep the indexing the way it is, but you can still edit the file by clicking on the `Show all files` in your editor.
+
+### Adding a launch profile to start Autocad automatically
+We probably want to start the Autocad application whenever we run a debug. You could add a launch profile to your editor every time you create a plugin, but why not make this easy?
+
+1. Add a `Properties` folder to the project.
+2. Add a file called `launchSettings.json` to this folder.
+3. Add the following to the new file, but change the `executablePath` to the path to your `acad.exe` location.
+    ```json
+    {
+      "profiles": {
+        "Autocad 2026": {
+          "commandName": "Executable",
+          "executablePath": "C:\\Program Files\\Autodesk\\AutoCAD 2026\\acad.exe",
+          "commandLineArgs": "/nologo /b \"start.scr\""
+        }
+      }
+    }
+    ```
+By reinstalling the project and opening a new implementation, you will see a new launch profile is available in your editor called `Autocad 2026`. You can now debug the project and see that Autocad is launching, but it will report that the "magical" `start.scr` that we mentioned in the `commandLineArgs` was not found. We will discuss it next.
+
+### Loading the plugin automatically
+
+We want to run a command in AutoCAD that loads the `.dll` file. This process can and should be automated by you, because it needs to be done every time you debug. The command is `NETLOAD "<YourPlugin.dll> "` and if we put this command in the `.scr` file, we can update it to the output folder. This way it is easy to tell AutoCAD to run this when it starts up from our project.
+
+1. Add a file called `start.scr` to the project. Open the file and add `NETLOAD "AutocadTemplate.dll "`. **The space at the end is intentional** and recognize that this is the sourceName-replacing-trick again.
+2. To add this `start.scr` to the output folder for debugging, add a little bit to the `AutocadTemplate.dll`. It should now look like this:
+```xml
+<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <TargetFramework>net8.0</TargetFramework>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <Nullable>enable</Nullable>
+        <RootNamespace>AutocadTemplate</RootNamespace>
+    </PropertyGroup>
+    
+    <ItemGroup>
+        <Reference Include="accoremgd">
+            <HintPath>C:\Autocad 2026 ObjectARX\inc\AcCoreMgd.dll</HintPath>
+            <Private>False</Private>
+        </Reference>
+        <Reference Include="Acdbmgd">
+            <HintPath>C:\Autocad 2026 ObjectARX\inc\AcDbMgd.dll</HintPath>
+            <Private>False</Private>
+        </Reference>
+        <Reference Include="acmgd">
+            <HintPath>C:\Autocad 2026 ObjectARX\inc\AcMgd.dll</HintPath>
+            <Private>False</Private>
+        </Reference>
+    </ItemGroup>
+
+    <ItemGroup>
+        <None Update="start.scr">
+            <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+        </None>
+    </ItemGroup>
+
+</Project>
 ```
+Again, reinstall and check out if it works. There should be a message that says:
+
+`NETLOAD Assembly file name: "<NameOfImplementation>.dll"`
+
+If it still does not work you should run `LEGACYCODESEARCH` in AutoCAD and make sure that is set to `ON`. 
+
+[HINT] You can also set `SECURELOAD` to `FALSE` in AutoCAD to not get the pop-up asking if you want to load your plugin. Only use these settings while debugging.
+
+### The Active Class & Commands Class
+When you create a new plugin, you probably want to add a new command to AutoCAD. There are lots of other things you can do, but the reoccurring thing is creating these new commands. For the creation of these commands, you are very likely to encounter a couple of objects that let you manipulate the program:
+
+- The active document
+- The active editor
+- The active database
+
+Active means that this is a part of the program that the user is interacting with. You could also be working with inactive documents for example. The starting point of you plugin is almost always in the active workspace, so we could at some infrastructure to interact with these objects. This idea comes from a [class of Ben Rand](https://www.autodesk.com/autodesk-university/class/Create-Your-First-AutoCAD-Plug-2020#video), which I would highly recommend to watch to get an idea of what an AutoCAD plugin could do. If it doesn't make sense jet, just follow along. Everything will become clear once you see a simple example.
+
+Create a new file in the project called `Active.cs` and add the follow code:
+```csharp
+using Autodesk.AutoCAD.ApplicationServices;
+using Autodesk.AutoCAD.DatabaseServices;
+using Autodesk.AutoCAD.EditorInput;
+
+namespace AutocadTemplate;
+
+public static class Active
 {
-  "$schema": "http://json.schemastore.org/template",
-  "author": "Luc van Dijk",
-  "classifications": [ "Empty" ],
-  "identity": "EmptyTemplate",
-  "name": "Empty Template",
-  "shortName": "empty",
-  "sourceName": "Empty",
-  "preferNameDirectory":true,
-  "tags": {
-    "language": "C#",
-    "type": "project"
-  }
+   public static Document Document 
+      => Application.DocumentManager.MdiActiveDocument;
+   
+   public static Editor Editor 
+      => Document.Editor;
+   
+   public static Database Database 
+      => Document.Database;
 }
 ```
-You can find [here](https://learn.microsoft.com/en-us/dotnet/core/tools/custom-templates) what all the items mean. We will explore the important once later in this tutorial.
- 
-### Adding a standard file/folder to you project
-When debugging an AutoCAD plugin, you want to start the application to run your newly edited command. To not have to manually do this, we first want to create a properties folder with a launchSettings.json. These launch settings will create a debug profile in the code editor, which is really useful for any application. Lets start with the creating these files.
-### Create a templates
-In the image bellow you can see the structure that we will be using for this tutorial. There is a folder called AutoCAD.Basic.Template. For now, this folder just contains a start.scr file and a properties folder (we will get back to these) and in addition to that it has the .template.config folder with the template.json file inside. The way I like to do this:
-1.	Open the a file explorer
-2.	Create a folder called templates wherever you like.
-3.	In the Templates folder:
-a.	Create a folder called Basic.
-b.	Add a text file to the folder. Open the text file and directly save it as a Basic.csproj
-4.	Open Basic.csproj in the code editor of you choice. I will use Rider for this tutorial. It will give an error since it is an empty project file. Right-click on it and click on Edit > Edit ‘Basic.csproj’
-This is actually all you need to create you first template. In order to implement it we must install it first. To do this, open a terminal and go into the folder were the template is located. If you are coding along in Rider, you can just use the build in terminal. Once you located the 
-Download these beforehand
--	Autodesk AutoCAD 2026.
--	The objectARX for AutoCAD 2026. It is not that clear where to find this:
-o	Go to this website.
-https://aps.autodesk.com/developer/overview/objectarx-autocad-sdk
-o	Scroll down to “View license agreement”
-o	Agree to the terms and let them agree that you are not a robot
-o	Download the right version for your device
-o	Run the installer and place the files on a convenient place
--	A code editor of your choice. I use Rider by Jetbrains demonstration purposes, since I think that there already are quite some guides for creating templates in Visual Studio. The same principles apply for both.
-Let’s start with creating a template in Rider
+This makes accessing these objects a little bit simpler. For example, accessing the editor to write a message is normally done by:
 
-No matter which IDE you pick to you have to create a coupling between AutoCAD and your editor and there are some steps that you could optionally take to create your plugin. Most of the business is happening in the project file (.csproj), so we can create a template for it. This way, we can pick the template as a starting point for all of our upcoming projects. Here are the steps:
-1.	Create a class
-2.	Target the right .NET edition, which is .NET 8.0 in AutoCAD 2026, but could be something else by the time you are reading this. Check it out here.
-https://help.autodesk.com/view/OARX/2025/ENU/?guid=GUID-450FD531-B6F6-4BAE-9A8C-8230AAC48CB4
-3.	Reference all the packages that are necessary for the code to understand what objects and functions are available in AutoCAD. These packages are downloaded along with AutoCAD.
-4.	Automatically start the AutoCAD application when you want debug.
-GileCAD already created this template for you. Check out his repo and adjust it for your needs. I would highly recommend reading the README.md if you are new to these kind of setups, since it explains it really clearly. It also states which file paths must be changed to find the right files on your device.
+`Application.DocumentManager.MdiActiveDocument.Editor.WriteMessage("\nHello")`
 
-What is the “best” IDE to use for creating Autocad Plugins?
-Of course, it totally depends on you. But there are some aspects that make one IDE more advantageous over the others. Lets quickly look at some of the code editors that you might consider.
-Still in? Lets see what some code editors have to offer to you. 
-Rider by Jetbrains
-I first used Rider for all my C# coding, since I used it in university and also because I’ve used Pycharm for some coding in Python. Rider is nice and clean, but 
+And now becomes:
+
+`Active.Editor.WriteMessage("\nHello")`
+
+Again, the namespace name will be changed, like we have seen a couple of times by now.
+
+Another useful file to add is a `Commands.cs` file containing a class that collects all the commands you will create. These commands have an attribute called CommandMethod that will do all the setup for you to run it from the command line in AutoCAD. There are lot more options that this attribute can have to create this setup, but we will not explore that here. This should be in the `Commands.cs` file:
+```csharp
+using Autodesk.AutoCAD.Runtime;
+
+namespace AutocadTemplate;
+
+public class Commands
+{
+   [CommandMethod("Test")]
+   public static void Test()
+   {
+      Active.Editor.WriteMessage("\nHello World!");
+   }
+}
+```
+This very simple method will run when the user types `Test` and it will then write "Hello World!" in the editor.
+
+Save everything and reinstall the template. Before we package, lets checkout what we actually have right now.
+
+When we use the template for a new project and start debugging the project 
+- automatically starts AutoCAD.
+- loads the newly compiled `.dll` in AutoCAD.
+- has some basic infrastructure to interact with AutoCAD.
+- has a placeholder method for quickly testing if everything is ready for your coding.
+
+Great! This is already really useful for yourself. To share this requires you to package your templates. We need a special `.csproj` file is styled in a way that .NET knows how to pack and should be located in the folder with the templates. Here is an example of such a folder with 2 templates.
+```
+AutocadTemplates
+├───AutocadTemplates.csproj
+└───Templates
+    ├───Template1
+    │   ├───.template.config 
+    │   │   │   template.json
+    │   │
+    │   ├───file1.cs
+    │   ...
+    │   
+    └───Template2
+        ├───.template.config 
+        │   │   template.json
+        │
+        ├───file1.cs
+        ...
+```
+For our project we only have 1 template, but we have to pack it like in this form anyway. The good thing about this is of course that you can add as many templates to this package as you like. So:
+
+1. Create a new folder called "AutocadTemplates" or whatever you think is a good name for you package.
+2. Add a `AutocadTemplates.csproj` file to this folder.
+3. Add the follow code to it:
+   ```xml
+   <Project Sdk="Microsoft.Net.Sdk">
+       
+       <PropertyGroup>
+           <PackageType>Template</PackageType>
+           <PackageVersion>1.0</PackageVersion>
+           <PackageId>LucsAutocadTemplate</PackageId>
+           <Title>Autocad plugin template for C#</Title>
+           <Authors>Luc van Dijk</Authors>
+           <Description>A template for creating a new Autocad plugin using C#</Description>
+           <PackageTags>templates;dotnet;AutoCad</PackageTags>
+           <TargetFramework>net8.0</TargetFramework>
+           
+           <IncludeContentInPack>true</IncludeContentInPack>
+           <IncludeBuildOutput>false</IncludeBuildOutput>
+           <ContentTargetFolders>content</ContentTargetFolders>
+       </PropertyGroup>
+       
+       <ItemGroup>
+           <Content Include="Templates\**\*" Exclude="Templates\**\bin\**;Templates\**\obj**" />
+           <Compile Remove="**\*" />
+       </ItemGroup>
+   </Project>
+   ```
+   Here is a quick overview of the most important features:
+   - PackageType: is "Template", letting the packager know what to expect.
+   - PackageId: is the name that the user of you package calls to install all the templates in the package.
+   - PackageTags: helps users on NuGet find you package.
+   - The ItemGroup at the bottom filters out all the `bin` and `obj` folders that get created when you work on your template in a code editor.
+4. Create a folder called `Templates` in the same folder as the `AutocadTemplates.csproj`. This folder will contain all the templates that you want to add to the package.
+5. Copy and past the template project to this `Templates` folder.
+
+We are ready for packing:
+1. Open a terminal.
+2. Go to the `AutocadTemplates` folder
+3. Run `dotnet pack`
+
+You can find your new NuGet package the `bin/Release/net8.0` folder of this project. To install the package, you have to install 
+
+
+
+
+
 
