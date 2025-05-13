@@ -14,16 +14,5 @@ namespace Basic
         
         public static Database Database 
             => Document.Database;
-        
-        public static void UsingTransaction(Action<Transaction>
-            action)
-        {
-            using (var transaction =
-                   Active.Database.TransactionManager.StartTransaction())
-            {
-                action(transaction);
-                transaction.Commit();
-            }
-        }
     }
 }

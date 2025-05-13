@@ -94,7 +94,7 @@ Let's start working in a code editor now. Pick one you like, and open the `Autoc
 
 Since the `.template.config` was not indexed with the project, it might not be visible in your code editor. We want to keep the indexing the way it is, but you can still edit the file by clicking on the `Show all files` in your editor.
 
-### Adding a launch profile to start Autocad automatically
+#### Adding a launch profile to start Autocad automatically
 We probably want to start the Autocad application whenever we run a debug. You could add a launch profile to your editor every time you create a plugin, but why not make this easy?
 
 1. Add a `Properties` folder to the project.
@@ -113,7 +113,7 @@ We probably want to start the Autocad application whenever we run a debug. You c
     ```
 By reinstalling the project and opening a new implementation, you will see a new launch profile is available in your editor called `Autocad 2026`. You can now debug the project and see that Autocad is launching, but it will report that the "magical" `start.scr` that we mentioned in the `commandLineArgs` was not found. We will discuss it next.
 
-### Loading the plugin automatically
+#### Loading the plugin automatically
 
 We want to run a command in AutoCAD that loads the `.dll` file. This process can and should be automated by you, because it needs to be done every time you debug. The command is `NETLOAD "<YourPlugin.dll> "` and if we put this command in the `.scr` file, we can update it to the output folder. This way it is easy to tell AutoCAD to run this when it starts up from our project.
 
@@ -160,7 +160,7 @@ If it still does not work you should run `LEGACYCODESEARCH` in AutoCAD and make 
 
 [HINT] You can also set `SECURELOAD` to `FALSE` in AutoCAD to not get the pop-up asking if you want to load your plugin. Only use these settings while debugging.
 
-### The Active Class & Commands Class
+#### The Active Class & Commands Class
 When you create a new plugin, you probably want to add a new command to AutoCAD. There are lots of other things you can do, but the reoccurring thing is creating these new commands. For the creation of these commands, you are very likely to encounter a couple of objects that let you manipulate the program:
 
 - The active document
@@ -210,21 +210,13 @@ public class Commands
    [CommandMethod("Test")]
    public static void Test()
    {
-      Active.Editor.WriteMessage("\nHello World!");
+      Active.Editor.WriteMessage("\nHello, World!");
    }
 }
 ```
-This very simple method will run when the user types `Test` and it will then write "Hello World!" in the editor.
+This very simple method will run when the user types `Test` and it will then write "Hello, World!" in the editor.
 
-Save everything and reinstall the template. Before we package, lets checkout what we actually have right now.
-
-When we use the template for a new project and start debugging the project 
-- automatically starts AutoCAD.
-- loads the newly compiled `.dll` in AutoCAD.
-- has some basic infrastructure to interact with AutoCAD.
-- has a placeholder method for quickly testing if everything is ready for your coding.
-
-Great! This is already really useful for yourself. To share this requires you to package your templates. We need a special `.csproj` file is styled in a way that .NET knows how to pack and should be located in the folder with the templates. Here is an example of such a folder with 2 templates.
+Great! This is already a good template for personal use. To share this requires you to package your templates. We need a special `.csproj` file is styled in a way that .NET knows how to pack and should be located in the folder with the templates. Here is an example of such a folder with 2 templates.
 ```
 AutocadTemplates
 ├───AutocadTemplates.csproj
@@ -285,7 +277,146 @@ We are ready for packing:
 2. Go to the `AutocadTemplates` folder
 3. Run `dotnet pack`
 
-You can find your new NuGet package the `bin/Release/net8.0` folder of this project. To install the package, you have to install 
+You can find your new NuGet package the `bin/Release/net8.0` folder of this project. To install the package, run this command in the `AutocadTemplates` folder:
+
+`dotnet new install .\bin\Release\net8.0\AutocadTemplates.1.0.0.nupkg`
+
+For testing purposes you can always uninstall the package and then package and reinstall it by doing the following steps:
+1. `dotnet new uninstall <package name>`
+2. `dotnet pack` in the folder of you package.
+3. `dotnet new install <path\to\.nupkg\file>`
+
+### Adding symbols
+Since we now have a nice template, we can start working on our new Autocad Plugins, but there is a lot more that you can do with templates. To add more flexibility to your template, you are preventing creating lots of branches of really similar templates. You can easily go to far with adding flexibility and arrive at a point where setting up the template is more complicated that starting from scratch. Keep your templates general and to the point, so you can use it for any case. Let's look at an example.
+
+If you are working with a specific use case it would be nice to have an option where a drawing (`.dwg` file) automatically starts when you debug your plugin. For example, you are working on a plugin that collects all the text objects in a drawing, and you want to save their text values to a database. It would be nice to open AutoCAD with a drawing containing a couple of text objects, so you can start testing straight away. 
+
+Open AutoCAD and create a new file. Save it as `debug.dwg` to the project folder.
+
+We need to create a parameter that the user of the template can enable and disable. The `template.json` has options to do this. We first add a new item that is called `symbols`. This contains all the custom symbols that we want to add to our project. We will add one that is called "includeStartUpDrawing" which is a boolean value that is set to "false" by default. Here is the changed `template.json`
+
+```json
+{
+   "$schema": "http://json.schemastore.org/template",
+   "author": "Luc van Dijk",
+   "classifications": [ "Autocad", "Plugin" ],
+   "identity": "AutocadTemplate",
+   "name": "Autocad Template",
+   "shortName": "ac-temp",
+   "sourceName": "AutocadTemplate",
+   "preferNameDirectory":true,
+   "tags": {
+     "language": "C#",
+     "type": "project"
+   },
+   "symbols": {
+      "includeStartUpDrawing": {
+         "type": "parameter",
+         "dataType": "bool",
+         "defaultValue": "false",
+         "displayName": "Include start up drawing",
+         "description": "Includes a .dwg file that always starts when debugging."
+      }
+   },
+   "sources": [
+      {
+         "modifiers": [
+            {
+               "condition": "(!includeStartUpDrawing)",
+               "exclude": ["debug.dwg"]
+            }
+         ]
+      }
+   ]
+}
+```
+As you can see, there is a new symbol, but also a `sources` section. This is a list where we can add conditions to specific sources (folders) in our project. By default, we are working in the project folder, but we can also target specific folders using a `source`. We now just want to remove a file conditionally from the main source, so we add a `modifiers` list where we add the `condition` and what we want to `exclude` if this condition is true. You can discover more about `sources` and in the [reference guide](https://github.com/dotnet/templating/wiki/Reference-for-template.json).
+
+When you now, after reinstalling, open a new solution in you IDE, you will see an option in the "Advanced Settings" section that has our new checkbox. 
+
+### Adding conditional pieces of code
+
+Having a just a checkbox and then removing a file is nice, but it is not enough: we still need to add some code to make it work. Let's dive in:
+
+- Updating the launch settings
+   
+   In order to start this new drawing file, we want to add it to the `commandLineArgs` in the `launchSettings`, but only when `includeStartUpDrawing` is set to true. We have a weird syntax that is specific for templates and on top of that depend on the file that you are working on. [here](https://github.com/dotnet/templating/wiki/Conditional-processing-and-comment-syntax) is a guide for conditionally formatting your templates with various file types. We just want to have an if-else statement that starts AutoCAD either with or without the `debug.dwg`:
+   ```json
+   {
+     "profiles": {
+       "Autocad 2026": {
+         "commandName": "Executable",
+         "executablePath": "C:\\Program Files\\Autodesk\\AutoCAD 2026\\acad.exe",
+         //#if (includeStartUpDrawing)
+         "commandLineArgs": "\"debug.dwg\" /nologo /b \"start.scr\""
+         ////#else
+         "commandLineArgs": "/nologo /b \"start.scr\""
+         //#endif
+       }
+     }
+   }
+   ``` 
+  Don't worry about the big red and yellow lines that your code editor places below the newly added lines. The problem is that `.json` files do not have commenting available, though when you implement this template, the "comments" and duplication problems will be gone.
+
+
+-  Updating the `.csproj` file
+
+   The same goes for the `AutocadTemplate.csproj`: we conditionally add a section that copies the `debug.dwg` file over to the output folder. Again, use [this](https://github.com/dotnet/templating/wiki/Conditional-processing-and-comment-syntax) as a reference for creating these if-statements, but now look for the `xml` file conditions.
+
+   ```xml
+   <Project Sdk="Microsoft.NET.Sdk">
+   
+       <PropertyGroup>
+           <TargetFramework>net8.0</TargetFramework>
+           <ImplicitUsings>enable</ImplicitUsings>
+           <Nullable>enable</Nullable>
+           <RootNamespace>AutocadTemplate</RootNamespace>
+       </PropertyGroup>
+   
+       <ItemGroup>
+           <Reference Include="accoremgd">
+               <HintPath>C:\Autocad 2026 ObjectARX\inc\AcCoreMgd.dll</HintPath>
+               <Private>False</Private>
+           </Reference>
+           <Reference Include="Acdbmgd">
+               <HintPath>C:\Autocad 2026 ObjectARX\inc\AcDbMgd.dll</HintPath>
+               <Private>False</Private>
+           </Reference>
+           <Reference Include="acmgd">
+               <HintPath>C:\Autocad 2026 ObjectARX\inc\AcMgd.dll</HintPath>
+               <Private>False</Private>
+           </Reference>
+       </ItemGroup>
+   
+       <ItemGroup>
+           <None Update="start.scr">
+               <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+           </None>
+           <!--#if (includeStartUpDrawing) -->
+           <None Update="debug.dwg">
+               <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+           </None>
+           <!--#endif -->
+       </ItemGroup>
+   
+   </Project>
+   ```
+
+Save everything, package and reinstall the template.
+
+If you followed along, your template now has the following features:
+- Starting AutoCAD with an optional test file when debugging.
+- Loading the newly compiled `.dll` in AutoCAD.
+- The basic infrastructure to interact with AutoCAD.
+- A placeholder method for quickly testing if everything is ready for your coding.
+
+### Reflecting on your templates
+When adding new feature to your template, you should be careful to not complicate the template. It is a balancing act between having an indepth and complex template versus a general-purpose and easy template. Keep it to the point as much as possible. What do you or the users really need to get out of it? Does this make it easier than starting of from scratch? Is this new feature an often reoccurring thing? 
+
+### Conclusion
+Custom templates for .NET projects like AutoCAD plugins can help starting your project faster and more consistent. The template created in this tutorial shows how you can easily add files, get inputs from the user of the template and turn files and pieces of code on and off, but there is a lot more to explore. Explore by creating your own templates and prevent writing reoccurring code
+
+
 
 
 

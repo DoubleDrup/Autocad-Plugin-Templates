@@ -26,9 +26,11 @@
         <None Update="start.scr">
             <CopyToOutputDirectory>Always</CopyToOutputDirectory>
         </None>
+        <!--#if (includeStartUpDrawing) -->
         <None Update="debug.dwg">
             <CopyToOutputDirectory>Always</CopyToOutputDirectory>
         </None>
+        <!--#endif -->
     </ItemGroup>
 
 </Project>

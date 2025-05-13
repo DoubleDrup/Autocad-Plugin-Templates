@@ -10,5 +10,24 @@
   "tags": {
     "language": "C#",
     "type": "project"
-  }
+  },
+  "symbols": {
+    "includeStartUpDrawing": {
+      "type": "parameter",
+      "dataType": "bool",
+      "defaultValue": "false",
+      "displayName": "Include start up drawing",
+      "description": "Includes a .dwg file that always starts when debugging."
+    }
+  },
+  "sources": [
+    {
+      "modifiers": [
+        {
+          "condition": "(!includeStartUpDrawing)",
+          "exclude": ["debug.dwg"]
+        }
+      ]
+    }
+  ]
 }

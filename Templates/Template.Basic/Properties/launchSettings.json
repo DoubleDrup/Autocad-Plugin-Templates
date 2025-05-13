@@ -3,7 +3,11 @@
     "Autocad 2026": {
       "commandName": "Executable",
       "executablePath": "C:\\Program Files\\Autodesk\\AutoCAD 2026\\acad.exe",
+      //#if (includeStartUpDrawing)
+      "commandLineArgs": "\"debug.dwg\" /nologo /b \"start.scr\""
+      ////#else
       "commandLineArgs": "/nologo /b \"start.scr\""
+      //#endif
     }
   }
 }
