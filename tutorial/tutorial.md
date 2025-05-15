@@ -344,7 +344,8 @@ Here is the file structure of the package:
 ![Final version of the basic template](images\basics\10_final_version_of_basic_template.png)
 
 ## Advanced Templates
-Since you now have a nice template, you could start working on a new Autocad Plugins, but there is a lot more that you can do with templates. By adding more flexibility to your template, you prevent the creation of a lot of branches of really similar templates. It is easy go to far with adding flexibility and arrive at a point where setting up the template is more complicated than starting from scratch. Keep it general and to the point, so it is useful for a lot of cases. 
+Since you now have a nice template, you could 
+working on a new Autocad Plugins, but there is a lot more that you can do with templates. By adding more flexibility to your template, you prevent the creation of a lot of branches of really similar templates. It is easy go to far with adding flexibility and arrive at a point where setting up the template is more complicated than starting from scratch. Keep it general and to the point, so it is useful for a lot of cases. 
 
 Hint: if you want to work on one template in your package is better to only have that template open to be able to live debug your template. In the rest of the tutorial you will be repackaging, because you will be working on setting some metadata for the templates that requires you to implement the template every time.
 
