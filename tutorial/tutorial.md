@@ -1,5 +1,5 @@
 # Create a custom template for AutoCAD plugin development in .NET 
-Starting a new project can take up some unnecessary time. You pick your favorite template from the standard library and start coding, but you realize that you could be copying code from a previous project. A custom template could be a good idea to create a quick and consistent starting point of your project.
+Starting a new project can take up some unnecessary time. You could start from scratch or use a template and start coding, but you realize that you could be copying code from a previous project. A custom template could be a good idea to create a quick and consistent starting point of your project.
 
 This tutorial will focus on making an AutoCAD plugin template package, but whether you are here for the AutoCAD part or just want to understand the templates for .NET, following this tutorial will enable you to create complex templates using basic building blocks.
 
@@ -21,9 +21,9 @@ Autocad.Template.Basic
     │   template.json
 ```
 
-1. Create a folder called `Autocad.Template.Basic`.
+1. Create a folder called `Autocad.Template.Basic` anywhere you like.
 2. Add a `.template.config` folder to it.
-3. Add a `.text` file to it, open it and add the json styled text below. Change the details to your preferences (definitions [here](https://learn.microsoft.com/en-us/dotnet/core/tools/custom-templates)). Most of them do not need clarification, but you will explore the important once later on in this tutorial. To keep things clear: the `sourceName` should have the same value as the folder name in step 1.
+3. Open a text editor and add the json styled text below. Change the details to your preferences (definitions [here](https://learn.microsoft.com/en-us/dotnet/core/tools/custom-templates)). Most of them do not need clarification, but you will explore the important once later on in this tutorial. To keep things clear: the `sourceName` should have the same value as the folder name in step 1.
     ```json
     {
       "$schema": "http://json.schemastore.org/template",
@@ -40,16 +40,16 @@ Autocad.Template.Basic
       }
     }
     ```
-4. Save the file as 'template.json' and remove the earlier created `.txt` file.
+4. Save the file as `template.json` to the `.template.config` folder
 
-You now have the previously shown file structure and that means that you have created our very first template. Quickly test it by opening a terminal, go in the directory of `...\Autocad.Template.Basic`. Now run the command `dotnet new install .` and your template is ready for use. By doing a `dotnet new list` your template should be there. Another way is to open a code editor, create a new project and then find the new template at "Custom Templates".
+You now have the previously shown file structure and that means that you have created our very first template. Quickly test it by opening a terminal, go in the directory of `...\Autocad.Template.Basic`. Now run the command `dotnet new install .` and your template is ready for use. By doing a `dotnet new list` your template should be there. Another way is to open a code editor, create a new project and then find the new template between the other templates. 
 ![dotnet new list](images/basics/1_template_appears_in_rider.png)
 
 Notice that by creating an implementation of the template, the `.template.config` folder has disappeared. This is the default behaviour of a template.
 
 You will be updating the template quite a bit in this tutorial. In order to see the changes, reinstall and then open a new project:
 
-- Run `dotnet new uninstall .` in your template folder to install.
+- Run `dotnet new uninstall .` in your template folder to uninstall.
 - Run `dotnet new install .` in your template folder to install.
 - Create a new project with the updated template.
 
@@ -61,8 +61,7 @@ The next step is adding more structure and some files to a project. Creating Aut
 Let's start by adding a `.csproj`.
 
 1. To connect to the AutoCAD API, you need to install the right version of [AutoCAD ObjectARX](https://aps.autodesk.com/developer/overview/objectarx-autocad-sdk). The download link is hidden behind the button "View license agreement". Download it and place it in a convenient place on your computer. For this tutorial you will be using a couple of `.dll` files in the `inc` folder. 
-2. Create a new `.txt` file in the `Autocad.Template.Basic` folder.
-3. Open the file and add the following xml code:
+2. Open a text editor and add the following xml code:
     ```xml
     <Project Sdk="Microsoft.NET.Sdk">
     
@@ -92,7 +91,7 @@ Let's start by adding a `.csproj`.
     ```
 4. Change the `RootNamespace` to the value of `sourceName` in the `template.json` file. This is important because every instance of this value will be replaced to the _name of the implementation of the template_, which is really handy. This will become clear after reinstalling the template. 
 5. Change the paths of the references to `accoremgd.dll`, `Acdbmgd.dll` and `acmgd.dll` to where they are located on your device.
-6. Save the file as `Autocad.Template.Basic.csproj` and remove the `.txt` file.
+6. Save the file as `Autocad.Template.Basic.csproj` to the `Autocad.Template.Basic` folder.
 
 ![Added a .csproj file](images/basics/3_added_csproj_file.png)
 Reinstall your template like earlier and then create a project with the template that is called `TestSourceName` for example. When you inspect the project you will see the following changes:
