@@ -1,6 +1,6 @@
 ﻿using Autodesk.AutoCAD.Runtime;
 
-namespace Basic;
+namespace AutoCAD.Template.Basic;
 
 public class Commands
 {

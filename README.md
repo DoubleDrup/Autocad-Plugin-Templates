@@ -50,7 +50,8 @@ AutoCAD.Template.Basic
 
 You now have the previously shown file structure and that means that you have created our very first template. Quickly test it by opening a terminal, go in the directory of `...\AutoCAD.Template.Basic`. Now run the command `dotnet new install .` and your template is ready for use. By doing a `dotnet new list` your template should be there. Another way is to open a code editor, create a new project and then find the new template between the other templates.
 
-![dotnet new list](images/basics/1_template_appears_in_rider.png)
+![dotnet new list](https://raw.githubusercontent.com/DoubleDrup/Autocad-Plugin-Templates/main/images/basics/1_template_appears_in_rider.png
+)
 
 Notice that by creating an implementation of the template, the `.template.config` folder has disappeared. This is the default behaviour of a template.
 
@@ -60,7 +61,7 @@ You will be updating the template quite a bit in this tutorial. In order to see 
 - Run `dotnet new install .` in your template folder to install.
 - Create a new project with the updated template.
 
-![dotnet new list](images/basics/2_install_vs_uninstall.png)
+![dotnet new list](https://raw.githubusercontent.com/DoubleDrup/Autocad-Plugin-Templates/main/images/basics/2_install_vs_uninstall.png)
 
 ### Adding files/folders to a project template
 The next step is adding more structure and some files to a project. Creating AutoCAD plugins can be made significantly easier if you set up a couple of files that launch AutoCAD and load the plugin file. It is also necessary to connect to the AutoCAD programming interface by having a `.csproj` that includes the dependencies.
@@ -100,13 +101,13 @@ Let's start by adding a `.csproj`.
 5. Change the paths of the references to `accoremgd.dll`, `Acdbmgd.dll` and `acmgd.dll` to where they are located on your device.
 6. Save the file as `AutoCAD.Template.Basic.csproj` to the `AutoCAD.Template.Basic` folder.
 
-![Added a .csproj file](images/basics/3_added_csproj_file.png)
+![Added a .csproj file](https://raw.githubusercontent.com/DoubleDrup/Autocad-Plugin-Templates/main/images/basics/3_added_csproj_file.png)
 Reinstall your template like earlier and then create a project with the template that is called `TestSourceName` for example. When you inspect the project you will see the following changes:
 - `AutoCAD.Template.Basic.csproj` -> `TestSourceName.csproj`
 - `<RootNamespace>AutoCAD.Template.Basic</RootNamespace>` -> `<RootNamespace>TestSourceName</RootNamespace>`
 
 
-![Added a .csproj file](images/basics/4_test_source_name_project.png)
+![Added a .csproj file](https://raw.githubusercontent.com/DoubleDrup/Autocad-Plugin-Templates/main/images/basics/4_test_source_name_project.png)
 
 Pretty useful, right?
 
@@ -134,11 +135,11 @@ If you are creating .NET projects, you want to explain the compiler what you mea
 
 Instead of creating a new project to test our templates, just launch the template itself. Even the new launch profile is available and is called `AutoCAD 2026`. Run the template and notice that AutoCAD is now launching.
 
-![start.scr not found](images/basics/5_launch_profile.png)
+![start.scr not found](https://raw.githubusercontent.com/DoubleDrup/Autocad-Plugin-Templates/main/images/basics/5_launch_profile.png)
 
 Once AutoCAD has started, it will report that the "magical" `start.scr` that was mentioned in the `commandLineArgs` is not found. What is this file?
 
-![start.scr not found](images/basics/6_start_scr_not_found.png)
+![start.scr not found](https://raw.githubusercontent.com/DoubleDrup/Autocad-Plugin-Templates/main/images/basics/6_start_scr_not_found.png)
 
 #### Adding a start.scr
 
@@ -186,11 +187,11 @@ Whenever you want to load a plugin, you have to run a command in AutoCAD. This m
 ```
 Run the template and now AutoCAD opens and there should be a pop-up asking you if you want to load the plugin (accept or always accept it, it doesn't matter for now). The final check is that there is always a message in the command line of AutoCAD:
 
-![Netload message in command line of autocad](images\basics\7_netload_message.png)
+![Netload message in command line of autocad](https://raw.githubusercontent.com/DoubleDrup/Autocad-Plugin-Templates/main/images/basics/7_netload_message.png)
 
 If it does not work you should run `LEGACYCODESEARCH` in AutoCAD and make sure that is set to `ON`. This enables external files to be loaded add startup. You can now simply restart the debugging session and the message will be there.
 
-![Legacy code search ON](images\basics\8_legacy_code_search_on.png)
+![Legacy code search ON](https://raw.githubusercontent.com/DoubleDrup/Autocad-Plugin-Templates/main/images/basics/8_legacy_code_search_on.png)
 
 
 Hint: In the same way you can set `SECURELOAD` to `FALSE` to not get the pop-up asking if you want to load your plugin. Use this setting only while debugging.
@@ -251,7 +252,7 @@ public class Commands
 ```
 This very simple method will run when the user types `Test` in AutoCAD, resulting in a "Hello, World!" appearance in the editor.
 
-!["TEST" command in AutoCAD](images\basics\9_test_command_in_autocad.png)
+!["TEST" command in AutoCAD](https://raw.githubusercontent.com/DoubleDrup/Autocad-Plugin-Templates/main/images/basics/9_test_command_in_autocad.png)
 
 
 ### Packaging
@@ -343,11 +344,11 @@ For testing purposes you can always uninstall the package and then package and r
 2. `dotnet pack` in the folder of you package.
 3. `dotnet new install <path\to\file.nupkg>`
 
-![Uninstall, package, install](images\basics\11_repackaging.png)
+![Uninstall, package, install](https://raw.githubusercontent.com/DoubleDrup/Autocad-Plugin-Templates/main/images/basics/11_repackaging.png)
 
 Here is the file structure of the package:
 
-![Final version of the basic template](images\basics\10_final_version_of_basic_template.png)
+![Final version of the basic template](https://raw.githubusercontent.com/DoubleDrup/Autocad-Plugin-Templates/main/images/basics/10_final_version_of_basic_template.png)
 
 ## Advanced Templates
 Since you now have a nice template, you could
@@ -405,7 +406,7 @@ For now, you just want to remove a file conditionally from the main source, so y
 
 When you, after packing and reinstalling, create a new project with your template in your IDE, there is an option in the "Advanced Settings" section that has our new checkbox.
 
-![Final version of the basic template](images\advanced\1_checkbox_available.png)
+![Final version of the basic template](https://raw.githubusercontent.com/DoubleDrup/Autocad-Plugin-Templates/main/images/advanced/1_checkbox_available.png)
 
 ### Adding conditional pieces of code
 Having a just a checkbox and then removing a file is nice, but it is not enough: you still need to add 2 pieces of code to make it work. Let's dive in:

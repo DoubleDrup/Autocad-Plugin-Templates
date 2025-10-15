@@ -5,7 +5,7 @@
   "identity": "AutocadTemplateBasic",
   "name": "AutoCAD Plugin Basic Template",
   "shortName": "ac-plug-basic",
-  "sourceName": "Basic",
+  "sourceName": "AutoCAD.Template.Basic",
   "preferNameDirectory":true,
   "tags": {
     "language": "C#",

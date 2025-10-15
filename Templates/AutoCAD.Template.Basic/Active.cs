@@ -2,7 +2,7 @@
 using Autodesk.AutoCAD.DatabaseServices;
 using Autodesk.AutoCAD.EditorInput;
 
-namespace Basic
+namespace AutoCAD.Template.Basic
 {
     public static class Active
     {
