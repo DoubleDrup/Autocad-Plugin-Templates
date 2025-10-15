@@ -19,4 +19,25 @@
         <Content Include="Templates\**\*" Exclude="Templates\**\bin\**;Templates\**\obj**" />
         <Compile Remove="**\*" />
     </ItemGroup>
+
+    <PropertyGroup>
+        <PackageLicenseFile>LICENSE.txt</PackageLicenseFile>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <None Include="LICENSE.txt" Pack="true" PackagePath="LICENSE.txt"/>
+    </ItemGroup>
+
+    <PropertyGroup>
+        <PackageReadMeFile>README.md</PackageReadMeFile>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <None Include="README.md" Pack="true" Visible="true" PackagePath="README.md" />
+    </ItemGroup>
+    <ItemGroup>
+        <Content Include="images\**\*.*" Pack="true">
+            <PackageCopyToOutput>true</PackageCopyToOutput>
+        </Content>
+    </ItemGroup>
 </Project> 
